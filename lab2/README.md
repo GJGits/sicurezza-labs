@@ -176,3 +176,45 @@ key=EBE82D184F7A6722262F433273FFAE70
 iv =9051973CA95A7DA03668F1C504230162
 ```
 come si evince dall'output quello che succede è che la funzione ci chiede di inserire una password che verrà utilizzata per ottenere una chiave ed un vettore di inizializzazione.
+
+### 1.2 Attacco a forza bruta
+
+Avendo creato diverse macchine virtuali e settato la virtual network procederò con lo scambio file che utilizza ssh piuttosto che creare due utenti sulla stessa macchina. Dopo aver verificato che le due macchine riescono a comunicare tra di loro lanciare `ssh` sulla macchina di Bob.
+
+```sh
+systemctl start ssh
+```
+
+A questo punto creare una cartella `shared` e e generare il file cifrato richiesto all'interno di questa cartella.
+
+```sh
+mkdir shared && openssl enc -e -in ptext -out shared/ctext_alice -K 7 -rc4
+hex string is too short, padding with zero bytes to length
+```
+
+A questo punto è possibile copiare su Bob il file con il seguente comando
+
+```sh
+scp -r shared/ <IP Bob>:/home/Desktop/
+```
+
+il file ora si dovrebbe trovare sul Desktop di Bob, tuttavia potrebbe non essere visibile, lanciare il comando `ls` sul desktop di Bob per verificare il buon esito dell'operazione. Per provare ora a decifrare il messaggio posizionarsi sulla macchina di Bob e specificatamente sul Desktop di Bob ed eseguire il seguente comando
+
+```sh
+openssl enc -d -in ctext_alice -out ptext -K 1 -rc4 && nano ptext
+hex string is too short, padding with zero bytes to length
+```
+
+Verificare ad ogni tentativo il messaggio decifrato. Inviamo ora il file `bruteforce_enc` a Bob e ripetiamo la stessa procedura di prima
+
+```sh
+scp lab02_support/bruteforce_enc <IP Bob>:/home/Desktop/
+```
+
+e su Bob provare a lanciare il comando proposto
+
+```sh
+scp lab02_support/bruteforce_enc <IP Bob>:/home/Desktop/
+```
+
+Seguendo la procedura prima proposta non sono riuscito a decifrare il messaggio.
