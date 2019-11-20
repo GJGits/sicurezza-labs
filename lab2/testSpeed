@@ -2,39 +2,47 @@
 
 # create files
 
-openssl rand -out file-xs.txt 100
-openssl rand -out file-s.txt 10000
-openssl rand -out file-m.txt 1000000
-openssl rand -out file-lg.txt 100000000
+declare -A FILES=(
+  [file-xs.txt]=100
+  [file-s.txt]=10000
+  [file-m.txt]=1000000
+  [file-lg.txt]=100000000
+)
+
+for key in "${!FILES[@]}"; do
+  openssl rand -out $key ${FILES[$key]}
+done
 
 # cipher algorithms
 
-declare -A ALGOS=(
-  [DES_CBC]="des-cbc;6789098765432121;6789098765431221"
-  [DES_EDE3]="des-ede3;6789098765432121;6789098765431221"
-  [RC_4]="rc4;6789098765432121"
-  [AES_128]="aes-128-cbc;12345678909876543212345678909876;12345432123456789786543823476234"
-  [AES_192]="aes-192-cbc;"
-  [AES_256]="aes-256-cbc;"
-  [CHACHA_20]="chacha20;"
+ALGOS=("des-cbc;6789098765432121;6789098765431221" 
+"des-ede3;6789098765432121;6789098765431221" 
+"rc4;6789098765432121"
+"aes-128-cbc;12345678909876543212345678909876;12345432123456789786543823476234"
+"aes-192-cbc;"
+"aes-256-cbc;"
+"chacha20;"
 )
 
 IFS=';'
 
-for key in "${!ALGOS[@]}" 
-do
-  algo=${ALGOS[$key]}
+for (( i=0; i < 7; i++)); do 
+  algo=${ALGOS[$i]}
   read -ra tokens <<< "$algo"
-  for i in "${!tokens[@]}"
-  do
-    echo "${tokens[$i]}"
-  done
+  tokensLen=${#tokens[@]}
+  # block algorithm
+  if [[ $tokensLen == 3 ]] ; then
+    for key in "${!FILES[@]}"; do
+       opnstr="openssl enc -e -in $key -out c$key -K ${tokens[1]} -iv ${tokens[2]} -${tokens[0]} -p"
+    time $opnstr
+    done
+  fi
 done
 
 
 # remove files
 
-rm file-xs.txt
-rm file-s.txt
-rm file-m.txt
-rm file-lg.txt
+for key in "${!FILES[@]}"; do
+  rm $key 
+  rm "c$key"
+done
