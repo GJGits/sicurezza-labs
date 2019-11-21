@@ -33,8 +33,10 @@ for (( i=0; i < 7; i++)); do
   # block algorithm
   if [[ $tokensLen == 3 ]] ; then
     for key in "${!FILES[@]}"; do
-       opnstr="openssl enc -e -in $key -out c$key -K ${tokens[1]} -iv ${tokens[2]} -${tokens[0]} -p"
-    time $opnstr
+       echo "#### CIPHER TIME TEST ON ${tokens[0]} ####"	
+       time openssl enc -e -in $key -out c$key -K ${tokens[1]} -iv ${tokens[2]} -${tokens[0]} 
+       openssl speed ${tokens[0]}
+     #$opnstr
     done
   fi
 done
