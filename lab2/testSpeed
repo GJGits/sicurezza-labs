@@ -24,6 +24,8 @@ ALGOS=("des-cbc;6789098765432121;6789098765431221"
 "chacha20;"
 )
 
+echo "#### CIPHER PHASE"
+
 IFS=';'
 
 for (( i=0; i < 7; i++)); do 
@@ -35,6 +37,25 @@ for (( i=0; i < 7; i++)); do
     for key in "${!FILES[@]}"; do
        echo "#### CIPHER TIME TEST ON ${tokens[0]} ####"	
        time openssl enc -e -in $key -out c$key -K ${tokens[1]} -iv ${tokens[2]} -${tokens[0]} 
+       openssl speed ${tokens[0]}
+     #$opnstr
+    done
+  fi
+done
+
+echo "#### DECIPHER PHASE"
+
+IFS=';'
+
+for (( i=0; i < 7; i++)); do 
+  algo=${ALGOS[$i]}
+  read -ra tokens <<< "$algo"
+  tokensLen=${#tokens[@]}
+  # block algorithm
+  if [[ $tokensLen == 3 ]] ; then
+    for key in "${!FILES[@]}"; do
+       echo "#### DECIPHER TIME TEST ON ${tokens[0]} ####"	
+       time openssl enc -d -in c$key -out $key -K ${tokens[1]} -iv ${tokens[2]} -${tokens[0]} 
        openssl speed ${tokens[0]}
      #$opnstr
     done
