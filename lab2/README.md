@@ -572,4 +572,50 @@ Il comando `pkeyutl` offre una serie di comandi che servono sia a cifrare/decifr
 - cifra con la funzione `-encrypt` al quale si passa la chiave pubblica (privata)
 - decifra con la funzione `-decrypt` al quale si passa la chiave privata (pubblica)
 
-La firma digitale di un documento invece consiste nel calcolare un hash del file e cifrarlo con la chiave privata del mittente. A questo punto il ricevente può decifrare il digest utilizzando la chiave pubblica del mittente e confrontarlo con l'hash calcolato sul documento ricevuto, che a sua volta può essere in chiaro o meno.
+La firma digitale di un documento invece consiste nel calcolare un hash del file e cifrarlo con la chiave privata del mittente. A questo punto il ricevente può decifrare il digest utilizzando la chiave pubblica del mittente e confrontarlo con l'hash calcolato sul documento ricevuto, che a sua volta può essere in chiaro o meno. Per effettuare la firma di un documento il comando `pkeyutl` fornisce degli appositi flag.
+
+```sh
+
+# 1. generare la firma da memorizzare in sign
+openssl pkeyutl -sign -in plain -out sign -inkey rsa.key.alice
+
+# 2 verifico la firma
+openssl pkeyutl -verify -in plain -inkey rsa.key.alice -sigfile sign
+Signature Verified Successfully
+```
+
+### Generazione di chiavi EC
+
+Per informazioni sul comando `ecparam` è possibile visualizzare il link [ecparam](https://wiki.openssl.org/index.php/Command_Line_Elliptic_Curve_Operations), in particolare risulta utile eseguire un comando per prendere visione degli algoritmi implementati.
+
+```sh
+openssl ecparam -list_curves
+```
+il comando che ci viene richiesto è quindi `secp192k1`.
+
+```sh
+
+# 1. generare la curva
+openssl ecparam -name secp192k1 -out ec.key.alice
+
+# 2. mostrare i parametri associati
+openssl ecparam -in ec.key.alice -text -param_enc explicit -noout
+Field Type: prime-field
+Prime:
+    00:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:
+    ff:ff:ff:ff:ff:fe:ff:ff:ee:37
+A:    0
+B:    3 (0x3)
+Generator (uncompressed):
+    04:db:4f:f1:0e:c0:57:e9:ae:26:b0:7d:02:80:b7:
+    f4:34:1d:a5:d1:b1:ea:e0:6c:7d:9b:2f:2f:6d:9c:
+    56:28:a7:84:41:63:d0:15:be:86:34:40:82:aa:88:
+    d9:5e:2f:9d
+Order: 
+    00:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:fe:26:f2:
+    fc:17:0f:69:46:6a:74:de:fd:8d
+Cofactor:  1 (0x1)
+
+```
+
+
