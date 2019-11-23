@@ -555,4 +555,21 @@ Il comando proposta cifra il file plain e salva il contenuto in plain.enc.RSA.fo
 openssl pkeyutl -decrypt -in encRSA -out decRSA -inkey rsa.key.alice
 ```
 
-lanciando il comando `diff` si può constatare che il contenuto di `plain` è identico al contenuto di `decRSA`.
+lanciando il comando `diff` si può constatare che il contenuto di `plain` è identico al contenuto di `decRSA`. Dopo aver scaricato il pdf, provando a cifrarlo in cui è stato cifrato precedentemente il file `plain` in precedenza otteniamo il seguente risultato.
+
+```sh
+openssl pkeyutl -encrypt -in chap8.pdf -out ciph_chap8.pdf -inkey rsa.pubkey -pubin
+Public Key operation error
+139965432771712:error:0406D06E:rsa routines:RSA_padding_add_PKCS1_type_2:data too large for key size:../crypto/rsa/rsa_pk1.c:125:
+```
+
+Il motivo del messaggio d'errore è stato spiegato nella nota dell'esercizio.
+
+### 2.3 Operazioni di firma e verifica con l'algoritmo RSA
+
+Il comando `pkeyutl` offre una serie di comandi che servono sia a cifrare/decifrare che a firmare/verificare. Nel processo di cifratura/decifratura si:
+
+- cifra con la funzione `-encrypt` al quale si passa la chiave pubblica (privata)
+- decifra con la funzione `-decrypt` al quale si passa la chiave privata (pubblica)
+
+La firma digitale di un documento invece consiste nel calcolare un hash del file e cifrarlo con la chiave privata del mittente. A questo punto il ricevente può decifrare il digest utilizzando la chiave pubblica del mittente e confrontarlo con l'hash calcolato sul documento ricevuto, che a sua volta può essere in chiaro o meno.
