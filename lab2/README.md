@@ -596,9 +596,9 @@ il comando che ci viene richiesto è quindi `secp192k1`.
 ```sh
 
 # 1. generare la curva
-openssl ecparam -name secp192k1 -out ec.key.alice
+openssl ecparam -name secp192k1 -out ec.key.alice -genkey -noout
 
-# 2. mostrare i parametri associati
+# 2. mostrare i parametri associati alla curva
 openssl ecparam -in ec.key.alice -text -param_enc explicit -noout
 Field Type: prime-field
 Prime:
@@ -616,6 +616,55 @@ Order:
     fc:17:0f:69:46:6a:74:de:fd:8d
 Cofactor:  1 (0x1)
 
+# 3. mostrare il contenuto del file
+cat ec.key.alice 
+-----BEGIN EC PRIVATE KEY-----
+MFwCAQEEGErUDfK3gJxVWaiS06OOAG2PFtvgHZxARKAHBgUrgQQAH6E0AzIABGzQ
+P/NMrC3VD+ZwUFHGJSHkLUlJQtRU9gfvpm3vi5WgZLNxDIDisBPJtjtIqoWOow==
+-----END EC PRIVATE KEY-----
 ```
+
+Per estrarre la chiave pubblica dalla chiave privata precedentemente creata è possibile eseguire il seguente messaggio:
+
+```sh
+openssl ec -in ec.key.alice -pubout -out ec.pubkey.alice
+read EC key
+writing EC key
+```
+Il processo di firma e verifica resta invariato rispetto a prima, cambia semplicemente il tipo di chiavi utilizzate, non si usa RSA come in precedenza, ma curve ellittiche.
+
+```sh
+
+# 1. generare la firma da memorizzare in ecsign
+openssl pkeyutl -sign -in plain -out ecsign -inkey ec.key.alice 
+
+# 2. verifico la firma
+openssl pkeyutl -verify -in plain -inkey ec.key.alice -sigfile ecsign
+Signature Verified Successfully
+
+
+```
+
+### 2.6 Prestazioni
+
+test RSA
+
+```sh
+
+openssl speed rsa512 \
+> && openssl speed rsa1024 \
+> && openssl speed rsa2048 \
+> && openssl speed rsa4096
+
+                  sign    verify    sign/s verify/s
+rsa  512 bits 0.000074s 0.000008s  13554.5 128084.7
+rsa 1024 bits 0.000212s 0.000014s   4716.2  70377.9
+rsa 2048 bits 0.001053s 0.000042s    949.6  23656.6
+rsa 4096 bits 0.009187s 0.000187s    108.8   5348.9
+
+```
+
+la complesità delle operazioni dipende dal numero di bit con valore 1 negli esponenti E e D, dove E rappresenta l'esponente pubblico, mentre D rappresenta l'esponente privato. Nell'implementazione standard l'esponente pubblico è 65537 come visto in precedenza, questo è un numero con tanti bit ad 1 rendendo le operazioni più semplici. Nel processo di firma e verifica, l'esponente E viene utilizzato per decifrare, ecco il perché della differenza di risultati.
+
 
 
