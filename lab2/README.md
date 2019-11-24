@@ -647,7 +647,7 @@ Signature Verified Successfully
 
 ### 2.6 Prestazioni
 
-test RSA
+**test RSA**
 
 ```sh
 
@@ -666,5 +666,52 @@ rsa 4096 bits 0.009187s 0.000187s    108.8   5348.9
 
 la complesità delle operazioni dipende dal numero di bit con valore 1 negli esponenti E e D, dove E rappresenta l'esponente pubblico, mentre D rappresenta l'esponente privato. Nell'implementazione standard l'esponente pubblico è 65537 come visto in precedenza, questo è un numero con tanti bit ad 1 rendendo le operazioni più semplici. Nel processo di firma e verifica, l'esponente E viene utilizzato per decifrare, ecco il perché della differenza di risultati.
 
+**test RSA, DSA, ECDSA**
 
+```sh
+
+openssl speed rsa1024 \
+> && openssl speed dsa1024 \
+> && openssl speed ecdsap160
+
+                                sign    verify    sign/s verify/s
+rsa 1024 bits                0.000146s 0.000012s   6839.0  82177.4
+dsa 1024 bits                0.000239s 0.000180s   4187.2   5542.2
+160 bits ecdsa (secp160r1)   0.0006s     0.0007s   1790.8   1500.1
+
+
+```
+
+da questa analisi di massima si nota che DSA è molto più lento a parità di lunghezza della chiave, inoltre nonostante una chiave di soli 160 bit l'algoritmo a curve ellittiche è nettamente più lento degli altri due metodi.
+
+**test RSA2018, DSA2048, ECDSA256**
+
+```sh
+
+openssl speed rsa2048 \
+> && openssl speed dsa2048 \
+> && openssl speed ecdsap256
+
+                              sign    verify    sign/s verify/s
+rsa 2048 bits             0.000730s 0.000036s   1370.4  27433.2
+dsa 2048 bits             0.000596s 0.000503s   1677.9   1989.7
+256 bits ecdsa (nistp256)   0.0000s   0.0001s  22842.9   6978.0
+
+
+```
+
+**test RSA2048, DSA2048, AES128,SHA256**
+
+```sh
+
+openssl speed rsa2048 \
+> && openssl speed dsa2048 \
+> && openssl speed aes128 \
+> && openssl speed sha256
+
+                  sign    verify    sign/s verify/s
+rsa 2048 bits 0.000748s 0.000037s   1336.8  27150.4
+dsa 2048 bits 0.000590s 0.000513s   1695.4   1950.8
+
+```
 
