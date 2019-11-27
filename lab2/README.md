@@ -706,12 +706,86 @@ dsa 2048 bits             0.000596s 0.000503s   1677.9   1989.7
 
 openssl speed rsa2048 \
 > && openssl speed dsa2048 \
-> && openssl speed aes128 \
+> && openssl speed aes-128-cbc \
 > && openssl speed sha256
 
                   sign    verify    sign/s verify/s
 rsa 2048 bits 0.000748s 0.000037s   1336.8  27150.4
 dsa 2048 bits 0.000590s 0.000513s   1695.4   1950.8
 
+---
+
+Doing aes-128 cbc for 3s on 16 size blocks: 22639706 aes-128 cbc's in 2.99s
+Doing aes-128 cbc for 3s on 64 size blocks: 6746347 aes-128 cbc's in 2.98s
+Doing aes-128 cbc for 3s on 256 size blocks: 1763078 aes-128 cbc's in 2.99s
+Doing aes-128 cbc for 3s on 1024 size blocks: 1010034 aes-128 cbc's in 2.99s
+Doing aes-128 cbc for 3s on 8192 size blocks: 102634 aes-128 cbc's in 2.94s
+Doing aes-128 cbc for 3s on 16384 size blocks: 63265 aes-128 cbc's in 2.99s
+
+The 'numbers' are in 1000s of bytes per second processed.
+type             16 bytes     64 bytes    256 bytes   1024 bytes   8192 bytes  16384 bytes
+aes-128 cbc     121148.93k   144887.99k   150952.50k   345911.31k   285978.82k   346666.81k
+
+---
+
+Doing sha256 for 3s on 16 size blocks: 10029654 sha256's in 2.97s
+Doing sha256 for 3s on 64 size blocks: 5404949 sha256's in 2.96s
+Doing sha256 for 3s on 256 size blocks: 3035423 sha256's in 2.97s
+Doing sha256 for 3s on 1024 size blocks: 1007572 sha256's in 2.98s
+Doing sha256 for 3s on 8192 size blocks: 137003 sha256's in 2.97s
+Doing sha256 for 3s on 16384 size blocks: 68918 sha256's in 2.96s
+
+The 'numbers' are in 1000s of bytes per second processed.
+type             16 bytes     64 bytes    256 bytes   1024 bytes   8192 bytes  16384 bytes
+sha256           54031.81k   116863.76k   261639.15k   346226.08k   377888.41k   381470.44k
+
+
 ```
+
+## Algoritmi di digest
+
+### Calcolare e verificare un messaggio di digest
+
+Per effettuare i digest richiesti lanciare il comando 
+
+
+```sh
+
+openssl dgst -md5 -out MD5dgst msg \
+> && openssl dgst -sha1 -out SHA1dgst msg \
+> && openssl dgst -sha1 -out SHA1dgst msg \
+> && openssl dgst -sha256 -out SHA256dgst msg \
+> && openssl dgst -sha3-256 -out SHA3-256dgst msg
+
+```
+
+verifichiamo come cambiano i vari digest eliminando il punto esclamativo.
+
+```sh
+
+echo $(cat msg) | cut -c1-56 | openssl dgst -md5 | cut -c10- \ 
+> && cat MD5dgst | cut -c11-
+
+cb0339a7dfe988945788d5597b31d633
+31b047795a155ff6be701e37012a9bf4
+
+---
+
+echo $(cat msg) | cut -c1-56 | openssl dgst -sha1 | cut -c10- 
+> && cat SHA1dgst | cut -c12-
+
+082ec7c84a8b300759821985cbed9dffd71fb9b0
+e79e769b86676ac2748873215d1793a0a47ee64f
+
+---
+
+echo $(cat msg) | cut -c1-56 | openssl dgst -sha256 | cut -c10- \
+> && cat SHA256dgst | cut -c14-
+
+e9b651a102fee8a6ee8354fd7caff31dce604c7d624205222fe47022ae23f611
+e11ebb0fde8110f74768bbb3914c9f1d76bfdfc190c1d2d43da0e5aef44f65ba
+
+```
+
+confrontando i vari messaggi si può facilmente intuire che una modifica anche solo di un carattere cambia dtrasticamente il digest.
 
