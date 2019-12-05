@@ -60,3 +60,93 @@ $ touch msg2 && cat msg | cut -c-20 msg >> msg2 && openssl dgst -sha256 -out msg
 ```
 
 come si nota i due hmac non coincidono. Un attaccante in questo caso se non conosce la chiave non può calcolare l'hash.
+
+## 1.2 Authenticated Encryption with Associated Data (AEAD)
+
+Per ottenere gli algoritmi richiesti è possibile utilizzare il seguente comando
+
+```sh
+$ openssl list -cipher-algorithms | egrep 'CCM|GCM|OCB|EAX'
+```
+
+Per eseguire lo script proposto posizionarsi nella cartella `lab3` ed eseguire il seguente comando dopo essersi assicurati che lo script `aes-gcm.py` sia eseguibile.
+
+```sh
+$ ./aes-gcm.py -e plain aad cipher tag -K 12345678909876543212345678900987 -iv 09876543211234567890098765432112
+```
+
+Anche in questo caso invece di alterare il file principale creo un secondo file `plain2` al quale apporto delle modifiche per poi effettuare le verifiche richieste.
+
+```sh
+$ touch plain2 && echo "Bob, forse questo è ancora più segreto" >> plain2 && ./aes-gcm.py -e plain2 aad ciphertext2 tag2 -K 12345678909876543212345678900987 -iv 09876543211234567890098765432112
+
+```
+
+lanciando il comando `diff` su chiper/chiphertext2 e su tag/tag2 ci si accorge che i file non coincidono. Proviamo ora ad effettuare la funzione inversa. In un primo caso utilizziamo i file corretti (chiper,tag,aad), nel secondo caso invece utilizziamo (chipher, tag2, aad) che dovrebbe generare un errore.
+
+```sh
+
+$ ./aes-gcm.py -d plain3 aad cipher tag -K 12345678909876543212345678900987 -iv 09876543211234567890098765432112
+12345678909876543212345678900987
+Decryption successfully completed.
+
+$ diff plain3 plain -s
+Files plain3 and plain are identical
+
+$ ./aes-gcm.py -d plain4 aad cipher tag2 -K 12345678909876543212345678900987 -iv 09876543211234567890098765432112
+12345678909876543212345678900987
+Decryption Traceback (most recent call last):
+  File "./aes-gcm.py", line 119, in <module>
+    main()
+  File "./aes-gcm.py", line 110, in main
+    open(sys.argv[5],"rb").read()
+  File "./aes-gcm.py", line 49, in decrypt
+    return decryptor.update(ciphertext) + decryptor.finalize()
+  File "/usr/lib/python3/dist-packages/cryptography/hazmat/primitives/ciphers/base.py", line 198, in finalize
+    data = self._ctx.finalize()
+  File "/usr/lib/python3/dist-packages/cryptography/hazmat/backends/openssl/ciphers.py", line 170, in finalize
+    raise InvalidTag
+cryptography.exceptions.InvalidTag
+
+```
+
+Creiamo un nuovo file contenente gli associated data e salviamolo in `aad2`. Ripetiamo quindi le due operazioni precedenti utilizzando ora questo file. Per comodità il plain generato sarà sempre diverso per poter osservare alla fine tutte le differenze.
+
+```sh
+
+$ ./aes-gcm.py -d plain5 aad2 cipher tag -K 12345678909876543212345678900987 -iv 09876543211234567890098765432112
+12345678909876543212345678900987
+Decryption Traceback (most recent call last):
+  File "./aes-gcm.py", line 119, in <module>
+    main()
+  File "./aes-gcm.py", line 110, in main
+    open(sys.argv[5],"rb").read()
+  File "./aes-gcm.py", line 49, in decrypt
+    return decryptor.update(ciphertext) + decryptor.finalize()
+  File "/usr/lib/python3/dist-packages/cryptography/hazmat/primitives/ciphers/base.py", line 198, in finalize
+    data = self._ctx.finalize()
+  File "/usr/lib/python3/dist-packages/cryptography/hazmat/backends/openssl/ciphers.py", line 170, in finalize
+    raise InvalidTag
+cryptography.exceptions.InvalidTag
+
+$ ./aes-gcm.py -d plain6 aad2 cipher tag2 -K 12345678909876543212345678900987 -iv 09876543211234567890098765432112
+12345678909876543212345678900987
+Decryption Traceback (most recent call last):
+  File "./aes-gcm.py", line 119, in <module>
+    main()
+  File "./aes-gcm.py", line 110, in main
+    open(sys.argv[5],"rb").read()
+  File "./aes-gcm.py", line 49, in decrypt
+    return decryptor.update(ciphertext) + decryptor.finalize()
+  File "/usr/lib/python3/dist-packages/cryptography/hazmat/primitives/ciphers/base.py", line 198, in finalize
+    data = self._ctx.finalize()
+  File "/usr/lib/python3/dist-packages/cryptography/hazmat/backends/openssl/ciphers.py", line 170, in finalize
+    raise InvalidTag
+cryptography.exceptions.InvalidTag
+
+
+```
+
+Queste prove sembrerebbero confermare che se la tripla (cipher, aad, tag) non è corretta allora lo script darà errore.
+
+
