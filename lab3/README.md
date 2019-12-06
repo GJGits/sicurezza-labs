@@ -181,6 +181,21 @@ real	0m0.205s
 user	0m0.138s
 sys	0m0.009s
 
+```
+
+## 1.3 Firma digitale
+
+Per mantenere la separazione tra i vari laboratori creo anche in questa cartella una coppia di chiavi per Alice come suggerito.
+
+```console
+
+root@kali:~/Desktop/sicurezza-labs/lab3# openssl genrsa -out rsa.key.alice 2048 && openssl rsa -in rsa.key.alice -pubout -out rsa.pubkey.alice 
+Generating RSA private key, 2048 bit long modulus (2 primes)
+..........................+++++
+.........................+++++
+e is 65537 (0x010001)
+writing RSA key
+
 ``` 
 
 
