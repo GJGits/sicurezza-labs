@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# create files
+
+declare -A FILES=(
+  [file-xs.txt]=100
+  [file-s.txt]=10000
+  [file-m.txt]=1000000
+  [file-lg.txt]=100000000
+)
+
+for key in "${!FILES[@]}"; do
+  openssl rand -out $key ${FILES[$key]}
+done
+
+for key in "${!FILES[@]}"; do
+ echo "#### CIPHER TIME TEST ON $key ####"	
+ time ./aes-gcm.py -e $key aad f-cipher tag -K 12345678909876543212345678900987 -iv 09876543211234567890098765432112 
+done
+
+
+# remove files
+
+for key in "${!FILES[@]}"; do
+  rm $key 
+done
+
+rm f-cipher

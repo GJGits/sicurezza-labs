@@ -147,6 +147,40 @@ cryptography.exceptions.InvalidTag
 
 ```
 
-Queste prove sembrerebbero confermare che se la tripla (cipher, aad, tag) non è corretta allora lo script darà errore.
+Queste prove sembrerebbero confermare che se la tripla (cipher, aad, tag) non è corretta allora lo script darà errore. Per testare le prestazioni è stato creato un apposito script in linea con quello creato nel lab2. Dopo essersi assicurati che il file `testSpeed` sia presente nella cartella e che esso abbia i permesse necessari per essere eseguito, lanciare il seguente comando:
+
+```console
+
+root@kali:~/Desktop/sicurezza-labs/lab3# ./testSpeed 
+#### CIPHER TIME TEST ON file-lg.txt ####
+12345678909876543212345678900987
+Encryption successfully completed.
+
+real	0m0.289s
+user	0m0.191s
+sys	0m0.063s
+#### CIPHER TIME TEST ON file-m.txt ####
+12345678909876543212345678900987
+Encryption successfully completed.
+
+real	0m0.187s
+user	0m0.133s
+sys	0m0.023s
+#### CIPHER TIME TEST ON file-s.txt ####
+12345678909876543212345678900987
+Encryption successfully completed.
+
+real	0m0.171s
+user	0m0.136s
+sys	0m0.009s
+#### CIPHER TIME TEST ON file-xs.txt ####
+12345678909876543212345678900987
+Encryption successfully completed.
+
+real	0m0.205s
+user	0m0.138s
+sys	0m0.009s
+
+``` 
 
 
