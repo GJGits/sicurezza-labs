@@ -196,6 +196,43 @@ Generating RSA private key, 2048 bit long modulus (2 primes)
 e is 65537 (0x010001)
 writing RSA key
 
-``` 
+```
+
+Scarichiamo quindi il file richiesto
+
+```console
+
+root@kali:~/Desktop/sicurezza-labs/lab3# wget http://cacr.uwaterloo.ca/hac/about/chap11.pdf
+--2019-12-06 14:24:05--  http://cacr.uwaterloo.ca/hac/about/chap11.pdf
+Resolving cacr.uwaterloo.ca (cacr.uwaterloo.ca)... 129.97.140.120
+Connecting to cacr.uwaterloo.ca (cacr.uwaterloo.ca)|129.97.140.120|:80... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 526851 (515K) [application/pdf]
+Saving to: ‘chap11.pdf’
+
+chap11.pdf        100%[=============>] 514.50K   267KB/s    in 1.9s    
+
+2019-12-06 14:24:08 (267 KB/s) - ‘chap11.pdf’ saved [526851/526851]
+
+```
+
+Per firmare e verificare il file i passaggi sono i seguenti:
+
+- Alice firma il file (utilizzando il comando dgst o pkeyutl)
+- Alice invia a Bob il file, la firma e la sua chiave pubblica
+- Bob calcola il dgst del file e lo confronta con la firma decifrata con la chiave pubblica
+- se coincidono OK altrimenti ALARM!
+
+Questi passaggi in comandi si traducono nel seguente modo:
+
+```console
+
+root@kali:~/Desktop/sicurezza-labs/lab3# openssl dgst -sha256 -out sign -sign rsa.key.alice chap11.pdf
+
+
+
+```
+
+> Sembrerebbe che l'operazione di sign con la funzione `pkeyutl` funziona se il file passato ad `-in` è un hash, se si prova ad utilizzare la funzione sign di tale libreria sul file chap11.pdf si otterrà un messaggio d'errore.
 
 
