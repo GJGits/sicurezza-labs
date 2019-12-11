@@ -229,10 +229,27 @@ Questi passaggi in comandi si traducono nel seguente modo:
 
 root@kali:~/Desktop/sicurezza-labs/lab3# openssl dgst -sha256 -out sign -sign rsa.key.alice chap11.pdf
 
+# Bob IP
+root@kali:~/Desktop/sicurezza-labs/lab3# scp sign rsa.pubkey.alice chap11.pdf 10.0.2.5:/root/Desktop/
 
+# su Bob
+root@kali:~/Desktop openssl dgst -sha256 -verify rsa.pubkey.alice -signature sign chap11.pdf
 
 ```
 
 > Sembrerebbe che l'operazione di sign con la funzione `pkeyutl` funziona se il file passato ad `-in` è un hash, se si prova ad utilizzare la funzione sign di tale libreria sul file chap11.pdf si otterrà un messaggio d'errore.
 
+La verifica di una firma si basa sul procedimento illustrato sopra, se viene modificato il messaggio o la firma quel che si ottiene un disaccoppiamento dei digest che non essendo identici generano errore.
+
+## 2 Applicazioni della crittografia asimmetrica: chiavi di messaggio
+
+Supponiamo che Alice e Bob vogliano comunicare in maniera privata e che il file `rsa.key.alice` contenga la chiave almeno la chiave privata visto la nomenclatura utilizzata fino ad adesso e considerato il comando utilizzato. Alice compie i seguenti passi
+
+- sceglie una chiave che memorizza nel file `aeskey`
+- cifra il file chap12.pdf con questa chiave utilizzando aes-128-cbc ed un vettore di inizializzazione pari a 0
+- cifra con la chiave pubblica contenuta in `rsa.key.alice` la chiave `aeskey` generata in precedenza e la memorizza nel file `aeskey.rsa`.
+- a questo punto Alice invia a Bob il file cifrato, la chiave simmetrica (quella da lei creata e memorizzata in *aeskey*) in maniera cifrata e la coppia di chiavi memorizzate in `rsa.key.alice`. Di seguito vengono elencati i vari errori commessi dalla inesperta Alice
+
+- Utilizzare un vettore di inizializzazione nullo per cifrare con AES, non il più grande errore, ma non una grande idea.
+- Inviare le chiavi in chiaro a Bob, il file `rsa.key.alice` contiene la parte privata della coppia che appunto dovrebbe rimanere privata, se invece il file contenesse solo la parte pubblica della chiave allora Bob non potrebbe decifrare la chiave simmetrica scelta da Alice. Il problema risiede nello scambio delle chiavi, Alice e Bob devono trovare un modo sicuro per scambiarsi la chiave simmetrica con la quale comunicheranno da li in avanti. Per poter far ciò si può utilizzare Diffie-Hellman. Qui un link che spiega come poter utilizzare questa procedera con openssl ![openssl Diffie-Hellman](https://sandilands.info/sgordon/diffie-hellman-secret-key-exchange-with.openssl).
 
